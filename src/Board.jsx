@@ -61,6 +61,13 @@ function generateRandomLetter() {
 
 const TheBoard = styled.div`
   display:flex;
+  height:100vh;
+  width:100vw;
+  background: bisque;
+  padding:30px;
+  box-sizing: border-box;
+  overflow:hidden;
+  position:relative;
 `
 function Board() {
   const [state, setState] = useState({

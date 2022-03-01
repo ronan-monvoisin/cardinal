@@ -17,6 +17,7 @@ const CardContent = styled.div`
   color: #000;
   position:relative;
   cursor: grab;
+  margin:5px;
 `
 
 export function Card(props) {

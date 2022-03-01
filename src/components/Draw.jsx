@@ -4,9 +4,9 @@ import styled from 'styled-components'
 import { Droppable } from "react-beautiful-dnd";
 
 const StyledDraw = styled.div`
-  position:fixed;
-  top:0;
-  right:0;
+  position:absolute;
+  top:30px;
+  right:30px;
   display:flex;
 
 `
@@ -26,12 +26,13 @@ const CardDraw = styled.div`
   color: #000;
   position:relative;
   cursor: pointer;
+  margin:5px;
 `
 
 
 export function Draw(props) {
   return (
-    <StyledDraw id={props.item.name}>{console.log(props)}
+    <StyledDraw id={props.item.name}>
       <Droppable droppableId={props.item.name} direction="horizontal">
         {provided => (
           <div ref={provided.innerRef} {...provided.droppableProps}>

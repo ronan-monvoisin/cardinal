@@ -4,8 +4,8 @@ import { Card } from "./Card";
 import { Droppable } from "react-beautiful-dnd";
 
 const StyledHand = styled.div`
-  position:fixed;
-  bottom:-5px;
+  position:absolute;
+  bottom:30px;
   left:0;
   right:0;
   display: flex;
