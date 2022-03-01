@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext } from "react-beautiful-dnd";
 import styled from 'styled-components'
 import { Hand } from "./components/Hand";
-import { Table } from "./components/Table";
+import { Deck } from "./components/Deck";
+import { Draw } from "./components/Draw";
 
 
 // fake data generator
@@ -31,7 +32,6 @@ const getListStyle = isDraggingOver => ({
   background: isDraggingOver ? "lightblue" : "lightgrey",
   padding: grid
 });
-
 const reorder = (list, startIndex, endIndex) => {
   console.log(list);
   const result = Array.from(list);
@@ -39,6 +39,18 @@ const reorder = (list, startIndex, endIndex) => {
   result.splice(endIndex, 0, removed);
 
   return result;
+};
+/**
+ * Moves an item from one list to another list.
+ */
+const move = (state, result) => {
+  console.log(state, result);
+  const stateClone = {...state};
+  const [removed] = stateClone[result.source.droppableId].cards.splice(result.source.index, 1);
+
+  stateClone[result.destination.droppableId].cards.splice(result.destination.index, 0, removed);
+
+  return stateClone;
 };
 
 function generateRandomLetter() {
@@ -48,31 +60,24 @@ function generateRandomLetter() {
 }
 
 const TheBoard = styled.div`
-display:flex;
+  display:flex;
 `
 function Board() {
   const [state, setState] = useState({
     hand: {
       name: "hand",
-      cards: getItems(10)
+      cards: getItems(5)
     },
-    table: {
-      name: "table",
-      cards: getItems(10,10)
+    deck: {
+      name: "deck",
+      cards: getItems(2,10)
+    },
+    draw: {
+      name: "draw",
+      cards: [],
+      empty: false
     }
   });
-  /**
-   * Moves an item from one list to another list.
-   */
-  const move = (state, result) => {
-    console.log(state, result);
-    const stateClone = {...state};
-    const [removed] = stateClone[result.source.droppableId].cards.splice(result.source.index, 1);
-
-    stateClone[result.destination.droppableId].cards.splice(result.destination.index, 0, removed);
-
-    return stateClone;
-  };
   function onDragEnd(result) {
     console.log(result);
     if (!result.destination) {
@@ -97,6 +102,13 @@ function Board() {
       setState(newState);
     }
   }
+
+  function drawCard(){
+    const newState = {...state};
+    newState.draw.cards = [...getItems(1)]
+    setState(newState)
+  }
+  
   function deleteItem(ind, index) {
     const newState = [...state];
     newState[ind].splice(index, 1);
@@ -109,7 +121,8 @@ function Board() {
     <TheBoard id="board">
       <DragDropContext onDragEnd={onDragEnd}>
         <Hand item={state.hand} />
-        <Table item={state.table} />
+        <Deck item={state.deck} />
+        <Draw item={state.draw} onClicked={()=>(drawCard())} />
       </DragDropContext>
     </TheBoard>
   );

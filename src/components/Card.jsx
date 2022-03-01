@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { Draggable } from "react-beautiful-dnd";
 
 const CardContent = styled.div`
   width: 90px;
