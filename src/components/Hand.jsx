@@ -12,6 +12,23 @@ const StyledHand = styled.div`
   flex-direction: row;
   justify-content: center;
 `
+const CardDraw = styled.div`
+  width: 90px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  text-align:center;
+  font-size: 30px;
+  border-radius: 5px;
+  box-shadow: 0 2px 7px 1px rgba(31,31,31,0.2);
+  background-color: #EEE;
+  color: #000;
+  position:relative;
+  cursor: pointer;
+  margin:5px;
+`
 
 export function Hand(props) {
   return (
@@ -21,6 +38,7 @@ export function Hand(props) {
           {props.item.cards.map((card, index) => (
             <Card card={card} index={index} key={card.id} />
           ))}
+          <CardDraw id="pickcard">Pick</CardDraw>
           {provided.placeholder}
         </StyledHand>
       )}

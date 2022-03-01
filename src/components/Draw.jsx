@@ -44,8 +44,8 @@ export function Draw(props) {
         )}
       </Droppable>
       {(!props.item.empty) ?
-          <CardDraw onClick = {()=>(props.onClicked()) } > Draw</CardDraw>
-      :''}
+        <CardDraw onClick={() => (props.onClicked())} > Draw</CardDraw>
+        : ''}
     </StyledDraw>
   )
 }

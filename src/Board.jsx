@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import styled from 'styled-components'
 import { Hand } from "./components/Hand";
@@ -45,7 +45,7 @@ const reorder = (list, startIndex, endIndex) => {
  */
 const move = (state, result) => {
   console.log(state, result);
-  const stateClone = {...state};
+  const stateClone = { ...state };
   const [removed] = stateClone[result.source.droppableId].cards.splice(result.source.index, 1);
 
   stateClone[result.destination.droppableId].cards.splice(result.destination.index, 0, removed);
@@ -77,7 +77,7 @@ function Board() {
     },
     deck: {
       name: "deck",
-      cards: getItems(2,10)
+      cards: getItems(2, 10)
     },
     draw: {
       name: "draw",
@@ -92,8 +92,8 @@ function Board() {
     }
 
     if (result.source.droppableId === result.destination.droppableId) {
-      const newState = {...state};
-      console.log(result,newState);
+      const newState = { ...state };
+      console.log(result, newState);
       newState[result.destination.droppableId].cards = reorder(
         state[result.destination.droppableId].cards,
         result.source.index,
@@ -102,7 +102,7 @@ function Board() {
       setState(newState);
     } else {
       console.log(result);
-      let newState = {...state};
+      let newState = { ...state };
       newState = move(state, result);
       console.log(newState);
 
@@ -110,12 +110,19 @@ function Board() {
     }
   }
 
-  function drawCard(){
-    const newState = {...state};
+  function drawCard() {
+    const newState = { ...state };
     newState.draw.cards = [...getItems(1)]
     setState(newState)
   }
-  
+
+  function pickCard() {
+    if (!state.draw.cards.length) return
+    const newState = { ...state };
+    newState.hand.cards = [...getItems(1)]
+    setState(newState)
+  }
+
   function deleteItem(ind, index) {
     const newState = [...state];
     newState[ind].splice(index, 1);
@@ -123,13 +130,56 @@ function Board() {
       newState.filter(group => group.length)
     );
   }
+  function useMyCoolSensor(api) {
+    const start = useCallback(function start(event) {
+      const preDrag = api.tryGetLock(state.draw.cards[0].id);
+      if (!preDrag) {
+        return;
+      }
+      const card = document.querySelector(`[data-rbd-draggable-id='${state.draw.cards[0].id}']`).getBoundingClientRect()
+      const pick = pickcard.getBoundingClientRect()
 
+      const points = [];
+
+      // we want to generate 20 points between the start and the end
+      const numberOfPoints = 20;
+
+      for (let i = numberOfPoints; i > 0; i--) {
+        points.push({
+          x: pick.x + (card.left - pick.x) * i / numberOfPoints,
+          y: pick.y + (card.top - pick.y) * i / numberOfPoints
+        });
+      }
+      console.log({ x: card.left, y: card.top });
+      moveStepByStep(preDrag.fluidLift({ x: card.left, y: card.top }), points)
+    }, []);
+    function moveStepByStep(drag, values) {
+      console.log(drag, JSON.stringify(values));
+      requestAnimationFrame(() => {
+        const newPosition = values.shift();
+        drag.move(newPosition);
+
+        if (values.length) {
+          moveStepByStep(drag, values);
+        } else {
+          drag.drop();
+        }
+      });
+    }
+    useEffect(() => {
+      pickcard.addEventListener('click', start);
+
+      return () => {
+        pickcard.removeEventListener('click', start);
+      };
+    }, []);
+  }
   return (
     <TheBoard id="board">
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={onDragEnd} sensors={[useMyCoolSensor]}>
         <Hand item={state.hand} />
         <Deck item={state.deck} />
-        <Draw item={state.draw} onClicked={()=>(drawCard())} />
+        <Draw item={state.draw} onClicked={() => (drawCard())} />
       </DragDropContext>
     </TheBoard>
   );
