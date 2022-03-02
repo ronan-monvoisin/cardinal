@@ -85,8 +85,10 @@ function Board() {
       empty: false
     }
   });
+  function onDragStart(result) {
+    board.classList.add('dragging')
+  }
   function onDragEnd(result) {
-    console.log(result);
     if (!result.destination) {
       return;
     }
@@ -131,6 +133,11 @@ function Board() {
     );
   }
   function useMyCoolSensor(api) {
+    const test = useCallback(function test(event) {
+      let testcard = api.tryGetLock(state.deck.cards[0].id);
+      let movecard = testcard.fluidLift({ x: 200, y: 200 })
+      movecard.move({ x: 100, y: 100 })
+    });
     const start = useCallback(function start(event) {
       const preDrag = api.tryGetLock(state.draw.cards[0].id);
       if (!preDrag) {
@@ -168,20 +175,23 @@ function Board() {
     }
     useEffect(() => {
       pickcard.addEventListener('click', start);
+      testid.addEventListener('click', test);
 
       return () => {
         pickcard.removeEventListener('click', start);
+        testid.removeEventListener('click', test);
       };
     }, []);
   }
   return (
     <TheBoard id="board">
-      <DragDropContext onDragEnd={onDragEnd} sensors={[useMyCoolSensor]}>
+      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart} sensors={[useMyCoolSensor]}>
+        <button id="testid">Drag</button>
         <Hand item={state.hand} />
         <Deck item={state.deck} />
         <Draw item={state.draw} onClicked={() => (drawCard())} />
       </DragDropContext>
-    </TheBoard>
+    </TheBoard >
   );
 }
 export default Board;

@@ -3,12 +3,19 @@ import { Card } from "./Card";
 import styled from 'styled-components'
 import { Droppable } from "react-beautiful-dnd";
 
+
+const getListStyle = isDraggingOver => ({
+  background: isDraggingOver ? 'lightblue' : '',
+  display: 'flex',
+  padding: '8px',
+  overflow: 'auto',
+});
+
 const StyledDraw = styled.div`
   position:absolute;
   top:30px;
   right:30px;
   display:flex;
-
 `
 
 const CardDraw = styled.div`
@@ -34,8 +41,11 @@ export function Draw(props) {
   return (
     <StyledDraw id={props.item.name}>
       <Droppable droppableId={props.item.name} direction="horizontal">
-        {provided => (
-          <div ref={provided.innerRef} {...provided.droppableProps}>
+        {(provided, snapshot) => (
+          <div ref={provided.innerRef}
+            style={getListStyle(snapshot.isDraggingOver)}
+            {...provided.droppableProps}
+          >
             {props.item.cards.map((card, index) => (
               <Card card={card} index={index} key={card.id} />
             ))}
