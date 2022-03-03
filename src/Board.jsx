@@ -28,10 +28,12 @@ const getItemStyle = (isDragging, draggableStyle) => ({
   // styles we need to apply on draggables
   ...draggableStyle
 });
+
 const getListStyle = isDraggingOver => ({
   background: isDraggingOver ? "lightblue" : "lightgrey",
   padding: grid
 });
+
 const reorder = (list, startIndex, endIndex) => {
   console.log(list);
   const result = Array.from(list);
@@ -55,7 +57,6 @@ const move = (state, result) => {
 
 function generateRandomLetter() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz"
-
   return alphabet[Math.floor(Math.random() * alphabet.length)]
 }
 
@@ -85,6 +86,8 @@ function Board() {
       empty: false
     }
   });
+  const [dragCard, setDragCard] = useState(null);
+  const [dragging, setDragging] = useState(false);
   function onDragStart(result) {
     board.classList.add('dragging')
   }
@@ -102,6 +105,7 @@ function Board() {
         result.destination.index
       );
       setState(newState);
+      setDragging(false)
     } else {
       console.log(result);
       let newState = { ...state };
@@ -109,6 +113,7 @@ function Board() {
       console.log(newState);
 
       setState(newState);
+      setDragging(false)
     }
   }
 
@@ -135,19 +140,24 @@ function Board() {
   function useMyCoolSensor(api) {
     const test = useCallback(function test(event) {
       let testcard = api.tryGetLock(state.deck.cards[0].id);
-      let movecard = testcard.fluidLift({ x: 200, y: 200 })
-      movecard.move({ x: 100, y: 100 })
+      let movecard = testcard.fluidLift({ x: 0, y: 0 })
+      setDragCard(movecard.move({ x: 800, y: 600 }))
+      document.querySelector('#pickcard').attr('id','pickedcard')
+    });
+    const stop = useCallback(function stop(event) {
+      let card = dragCard();
+      card.drop();
+      document.querySelector('#pickedcard').attr('id','pickcard')
     });
     const start = useCallback(function start(event) {
       const preDrag = api.tryGetLock(state.draw.cards[0].id);
       if (!preDrag) {
         return;
       }
-      const card = document.querySelector(`[data-rbd-draggable-id='${state.draw.cards[0].id}']`).getBoundingClientRect()
+      const card = document.querySelector(`[data-rbd-draggable-id='${state.draw.cards[0]?.id}']`).getBoundingClientRect()
       const pick = pickcard.getBoundingClientRect()
 
       const points = [];
-
       // we want to generate 20 points between the start and the end
       const numberOfPoints = 20;
 
@@ -174,17 +184,19 @@ function Board() {
       });
     }
     useEffect(() => {
-      pickcard.addEventListener('click', start);
+      document.querySelector('#pickcard').addEventListener('click', start);
+      document.querySelector('.dragging #pickcard').addEventListener('click', stop);
       testid.addEventListener('click', test);
 
       return () => {
-        pickcard.removeEventListener('click', start);
+        document.querySelector('#pickcard').removeEventListener('click', start);
+        document.querySelector('.dragging #pickcard').removeEventListener('click', stop);
         testid.removeEventListener('click', test);
       };
     }, []);
   }
   return (
-    <TheBoard id="board">
+    <TheBoard id="board" theme={dragging}>
       <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart} sensors={[useMyCoolSensor]}>
         <button id="testid">Drag</button>
         <Hand item={state.hand} />
