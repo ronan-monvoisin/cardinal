@@ -86,7 +86,6 @@ function Board() {
       empty: false
     }
   });
-  const [dragCard, setDragCard] = useState(null);
   const [dragging, setDragging] = useState(false);
   function onDragStart(result) {
     board.classList.add('dragging')
@@ -138,17 +137,24 @@ function Board() {
     );
   }
   function useMyCoolSensor(api) {
+
     const test = useCallback(function test(event) {
+      console.log("card:",state.deck.cards[0].id);
       let testcard = api.tryGetLock(state.deck.cards[0].id);
-      let movecard = testcard.fluidLift({ x: 0, y: 0 })
-      setDragCard(movecard.move({ x: 800, y: 600 }))
-      document.querySelector('#pickcard').attr('id','pickedcard')
-    });
-    const stop = useCallback(function stop(event) {
-      let card = dragCard();
-      card.drop();
-      document.querySelector('#pickedcard').attr('id','pickcard')
-    });
+      console.log("testcard:",testcard);
+      let movecard = testcard.fluidLift({ x: 1, y: 1 })
+      movecard.move({ x: 800, y: 600 })
+      board.classList.add('dragging')
+      testid.style.display = "none"
+      testid.innerText = "Drop"
+      testid.addEventListener('click', () => {
+        movecard.drop()
+        testid.innerText = "Drag"
+        testid.removeEventListener('click', test)
+        testid.classList.remove('dragging')
+
+      })
+    })
     const start = useCallback(function start(event) {
       const preDrag = api.tryGetLock(state.draw.cards[0].id);
       if (!preDrag) {
@@ -184,14 +190,12 @@ function Board() {
       });
     }
     useEffect(() => {
-      document.querySelector('#pickcard').addEventListener('click', start);
-      document.querySelector('.dragging #pickcard').addEventListener('click', stop);
-      testid.addEventListener('click', test);
+      pickcard.addEventListener('click', start);
+      board.addEventListener('click', test);
 
       return () => {
-        document.querySelector('#pickcard').removeEventListener('click', start);
-        document.querySelector('.dragging #pickcard').removeEventListener('click', stop);
-        testid.removeEventListener('click', test);
+        pickcard.removeEventListener('click', start);
+        board.removeEventListener('click', test);
       };
     }, []);
   }
