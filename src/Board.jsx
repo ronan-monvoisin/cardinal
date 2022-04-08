@@ -5,16 +5,9 @@ import styled from 'styled-components'
 import { Hand } from "./components/Hand";
 import { Deck } from "./components/Deck";
 import { Draw } from "./components/Draw";
+import replik from "./games/replik";
 
 
-// fake data generator
-const getItems = (count, offset = 0) =>
-  Array.from({ length: count }, (v, k) => k).map(k => ({
-    id: `item-${k + offset}-${new Date().getTime()}`,
-    lettre: generateRandomLetter(),
-    hidden: true,
-    content: `item ${k + offset}`
-  }));
 
 const reorder = (list, startIndex, endIndex) => {
   console.log(list);
@@ -37,27 +30,9 @@ const move = (state, result) => {
   return stateClone;
 };
 
-function generateRandomLetter() {
-  const alphabet = "abcdefghijklmnopqrstuvwxyz"
-  return alphabet[Math.floor(Math.random() * alphabet.length)]
-}
 function Board(props) {
   const [context, setContext] = useContext(Context);
-  const [state, setState] = useState({
-    hand: {
-      name: "hand",
-      cards: getItems(5)
-    },
-    deck: {
-      name: "deck",
-      cards: getItems(2, 10)
-    },
-    draw: {
-      name: "draw",
-      cards: [],
-      empty: false
-    }
-  });
+  const [state, setState] = useState(replik.state)
   
   const [dragging, setDragging] = useState(false);
   function onDragStart(result) {
@@ -93,7 +68,7 @@ function Board(props) {
 
   function drawCard() {
     const newState = { ...state };
-    newState.draw.cards = [...getItems(1)]
+    newState.draw.cards = [...replik.getItems(1)]
     setState(newState)
   }
 

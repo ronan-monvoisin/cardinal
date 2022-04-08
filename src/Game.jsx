@@ -14,5 +14,6 @@ export default function Game() {
   )
 }
 function createContext() {
-  return {title:"Replik", round:""}
+  let context = { title: "Replik", round: 0, token: "" }
+  return context
 }
