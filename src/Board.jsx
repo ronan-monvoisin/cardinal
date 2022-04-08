@@ -15,25 +15,6 @@ const getItems = (count, offset = 0) =>
     hidden: true,
     content: `item ${k + offset}`
   }));
-const grid = 8;
-
-const getItemStyle = (isDragging, draggableStyle) => ({
-  // some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  padding: grid * 2,
-  margin: `0 0 ${grid}px 0`,
-
-  // change background colour if dragging
-  background: isDragging ? "lightgreen" : "grey",
-
-  // styles we need to apply on draggables
-  ...draggableStyle
-});
-
-const getListStyle = isDraggingOver => ({
-  background: isDraggingOver ? "lightblue" : "lightgrey",
-  padding: grid
-});
 
 const reorder = (list, startIndex, endIndex) => {
   console.log(list);
@@ -60,17 +41,6 @@ function generateRandomLetter() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz"
   return alphabet[Math.floor(Math.random() * alphabet.length)]
 }
-
-const TheBoard = styled.div`
-  display:flex;
-  height:100vh;
-  width:100vw;
-  background: bisque;
-  padding:30px;
-  box-sizing: border-box;
-  overflow:hidden;
-  position:relative;
-`
 function Board(props) {
   const [context, setContext] = useContext(Context);
   const [state, setState] = useState({
@@ -88,10 +58,12 @@ function Board(props) {
       empty: false
     }
   });
+  
   const [dragging, setDragging] = useState(false);
   function onDragStart(result) {
     document.querySelector('#board').classList.add('dragging')
   }
+
   function onDragEnd(result) {
     if (!result.destination) {
       return;
@@ -125,39 +97,7 @@ function Board(props) {
     setState(newState)
   }
 
-  function pickCard() {
-    if (!state.draw.cards.length) return
-    const newState = { ...state };
-    newState.hand.cards = [...getItems(1)]
-    setState(newState)
-  }
-
-  function deleteItem(ind, index) {
-    const newState = [...state];
-    newState[ind].splice(index, 1);
-    setState(
-      newState.filter(group => group.length)
-    );
-  }
   function useMyCoolSensor(api) {
-
-    // const test = useCallback(function test(event) {
-    //   console.log("card:",state.deck.cards[0].id);
-    //   let testcard = api.tryGetLock(state.deck.cards[0].id);
-    //   console.log("testcard:",testcard);
-    //   let movecard = testcard.fluidLift({ x: 1, y: 1 })
-    //   movecard.move({ x: 800, y: 600 })
-    //   board.classList.add('dragging')
-    //   testid.style.display = "none"
-    //   testid.innerText = "Drop"
-    //   testid.addEventListener('click', () => {
-    //     movecard.drop()
-    //     testid.innerText = "Drag"
-    //     testid.removeEventListener('click', test)
-    //     testid.classList.remove('dragging')
-
-    //   })
-    // })
     const start = useCallback(function start(event) {
       const preDrag = api.tryGetLock(state.draw.cards[0].id);
       if (!preDrag) {
@@ -180,6 +120,7 @@ function Board(props) {
       console.log(JSON.stringify(points));
       moveStepByStep(preDrag.fluidLift({ x: card.left, y: card.top }), points)
     }, []);
+
     function moveStepByStep(drag, values) {
       requestAnimationFrame(() => {
         const newPosition = values.shift();
@@ -193,6 +134,7 @@ function Board(props) {
         }
       });
     }
+
     useEffect(() => {
       document.querySelector('#pickcard').addEventListener('click', start);
       //document.querySelector('#board').addEventListener('click', test);
@@ -215,3 +157,68 @@ function Board(props) {
   );
 }
 export default Board;
+
+const TheBoard = styled.div`
+  display:flex;
+  height:100vh;
+  width:100vw;
+  background: bisque;
+  padding:30px;
+  box-sizing: border-box;
+  overflow:hidden;
+  position:relative;
+`
+
+
+
+    // const test = useCallback(function test(event) {
+    //   console.log("card:",state.deck.cards[0].id);
+    //   let testcard = api.tryGetLock(state.deck.cards[0].id);
+    //   console.log("testcard:",testcard);
+    //   let movecard = testcard.fluidLift({ x: 1, y: 1 })
+    //   movecard.move({ x: 800, y: 600 })
+    //   board.classList.add('dragging')
+    //   testid.style.display = "none"
+    //   testid.innerText = "Drop"
+    //   testid.addEventListener('click', () => {
+    //     movecard.drop()
+    //     testid.innerText = "Drag"
+    //     testid.removeEventListener('click', test)
+    //     testid.classList.remove('dragging')
+
+    //   })
+    // })
+function pickCard() {
+  if (!state.draw.cards.length) return
+  const newState = { ...state };
+  newState.hand.cards = [...getItems(1)]
+  setState(newState)
+}
+
+function deleteItem(ind, index) {
+  const newState = [...state];
+  newState[ind].splice(index, 1);
+  setState(
+    newState.filter(group => group.length)
+  );
+}
+
+const grid = 8;
+
+const getItemStyle = (isDragging, draggableStyle) => ({
+  // some basic styles to make the items look a bit nicer
+  userSelect: "none",
+  padding: grid * 2,
+  margin: `0 0 ${grid}px 0`,
+
+  // change background colour if dragging
+  background: isDragging ? "lightgreen" : "grey",
+
+  // styles we need to apply on draggables
+  ...draggableStyle
+});
+
+const getListStyle = isDraggingOver => ({
+  background: isDraggingOver ? "lightblue" : "lightgrey",
+  padding: grid
+});
