@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useContext } from "react";
+import { Context } from "./Context";
 import { DragDropContext } from "react-beautiful-dnd";
 import styled from 'styled-components'
 import { Hand } from "./components/Hand";
@@ -70,7 +71,8 @@ const TheBoard = styled.div`
   overflow:hidden;
   position:relative;
 `
-function Board() {
+function Board(props) {
+  const [context, setContext] = useContext(Context);
   const [state, setState] = useState({
     hand: {
       name: "hand",
@@ -88,7 +90,7 @@ function Board() {
   });
   const [dragging, setDragging] = useState(false);
   function onDragStart(result) {
-    board.classList.add('dragging')
+    document.querySelector('#board').classList.add('dragging')
   }
   function onDragEnd(result) {
     if (!result.destination) {
@@ -106,7 +108,7 @@ function Board() {
       setState(newState);
       setDragging(false)
     } else {
-      console.log(result);
+      console.log("result", result);
       let newState = { ...state };
       newState = move(state, result);
       console.log(newState);
@@ -114,6 +116,7 @@ function Board() {
       setState(newState);
       setDragging(false)
     }
+    document.querySelector('#board').classList.remove('dragging')
   }
 
   function drawCard() {
@@ -138,49 +141,50 @@ function Board() {
   }
   function useMyCoolSensor(api) {
 
-    const test = useCallback(function test(event) {
-      console.log("card:",state.deck.cards[0].id);
-      let testcard = api.tryGetLock(state.deck.cards[0].id);
-      console.log("testcard:",testcard);
-      let movecard = testcard.fluidLift({ x: 1, y: 1 })
-      movecard.move({ x: 800, y: 600 })
-      board.classList.add('dragging')
-      testid.style.display = "none"
-      testid.innerText = "Drop"
-      testid.addEventListener('click', () => {
-        movecard.drop()
-        testid.innerText = "Drag"
-        testid.removeEventListener('click', test)
-        testid.classList.remove('dragging')
+    // const test = useCallback(function test(event) {
+    //   console.log("card:",state.deck.cards[0].id);
+    //   let testcard = api.tryGetLock(state.deck.cards[0].id);
+    //   console.log("testcard:",testcard);
+    //   let movecard = testcard.fluidLift({ x: 1, y: 1 })
+    //   movecard.move({ x: 800, y: 600 })
+    //   board.classList.add('dragging')
+    //   testid.style.display = "none"
+    //   testid.innerText = "Drop"
+    //   testid.addEventListener('click', () => {
+    //     movecard.drop()
+    //     testid.innerText = "Drag"
+    //     testid.removeEventListener('click', test)
+    //     testid.classList.remove('dragging')
 
-      })
-    })
+    //   })
+    // })
     const start = useCallback(function start(event) {
       const preDrag = api.tryGetLock(state.draw.cards[0].id);
       if (!preDrag) {
         return;
       }
       const card = document.querySelector(`[data-rbd-draggable-id='${state.draw.cards[0]?.id}']`).getBoundingClientRect()
-      const pick = pickcard.getBoundingClientRect()
+      const pick = document.querySelector('#pickcard').getBoundingClientRect()
+      console.log(pick);
 
       const points = [];
       // we want to generate 20 points between the start and the end
       const numberOfPoints = 20;
 
-      for (let i = numberOfPoints; i > 0; i--) {
+      for (let i = numberOfPoints; i >= 0; i--) {
         points.push({
-          x: pick.x + (card.left - pick.x) * i / numberOfPoints,
-          y: pick.y + (card.top - pick.y) * i / numberOfPoints
+          x: pick.x - (pick.width / 2) + (card.right - pick.left) * i / numberOfPoints,
+          y: pick.y + (card.top - pick.top) * i / numberOfPoints
         });
       }
-      console.log({ x: card.left, y: card.top });
+      console.log(JSON.stringify(points));
       moveStepByStep(preDrag.fluidLift({ x: card.left, y: card.top }), points)
     }, []);
     function moveStepByStep(drag, values) {
-      console.log(drag, JSON.stringify(values));
       requestAnimationFrame(() => {
         const newPosition = values.shift();
         drag.move(newPosition);
+        console.log(newPosition);
 
         if (values.length) {
           moveStepByStep(drag, values);
@@ -190,12 +194,12 @@ function Board() {
       });
     }
     useEffect(() => {
-      pickcard.addEventListener('click', start);
-      board.addEventListener('click', test);
+      document.querySelector('#pickcard').addEventListener('click', start);
+      //document.querySelector('#board').addEventListener('click', test);
 
       return () => {
-        pickcard.removeEventListener('click', start);
-        board.removeEventListener('click', test);
+        document.querySelector('#pickcard').removeEventListener('click', start);
+        //document.querySelector('#board').removeEventListener('click', test);
       };
     }, []);
   }

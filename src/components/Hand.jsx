@@ -32,16 +32,18 @@ const CardDraw = styled.div`
 
 export function Hand(props) {
   return (
-    <Droppable droppableId={props.item.name} direction="horizontal">
-      {provided => (
-        <StyledHand id={props.item.name} ref={provided.innerRef} {...provided.droppableProps}>
-          {props.item.cards.map((card, index) => (
-            <Card card={card} index={index} key={card.id} />
-          ))}
-          <CardDraw id="pickcard">Pick</CardDraw>
-          {provided.placeholder}
-        </StyledHand>
-      )}
-    </Droppable>
+    <>
+      <Droppable droppableId={props.item.name} direction="horizontal">
+        {provided => (
+          <StyledHand id={props.item.name} ref={provided.innerRef} {...provided.droppableProps}>
+            {props.item.cards.map((card, index) => (
+              <Card card={card} index={index} key={card.id} />
+            ))}
+            {provided.placeholder}
+            <CardDraw id="pickcard">Pick</CardDraw>
+          </StyledHand>
+        )}
+      </Droppable>
+    </>
   )
 }
