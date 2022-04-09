@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { Hand } from "./components/Hand";
 import { Deck } from "./components/Deck";
 import { Draw } from "./components/Draw";
-import replik from "./games/replik";
+import replik from "./games/replik/replik";
 
 
 
@@ -68,7 +68,7 @@ function Board(props) {
 
   function drawCard() {
     const newState = { ...state };
-    newState.draw.cards = [...replik.getItems(1)]
+    newState.draw.cards = [...replik.draw(1)]
     setState(newState)
   }
 
@@ -166,7 +166,7 @@ const TheBoard = styled.div`
 function pickCard() {
   if (!state.draw.cards.length) return
   const newState = { ...state };
-  newState.hand.cards = [...getItems(1)]
+  newState.hand.cards = [...replik.draw(1)]
   setState(newState)
 }
 

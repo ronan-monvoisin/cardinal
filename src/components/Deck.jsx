@@ -7,9 +7,10 @@ export function Deck(props) {
     <Droppable droppableId={props.item.name}>
       {provided => (
         <div id={props.item.name} ref={provided.innerRef} {...provided.droppableProps}>
-          {props.item.cards.map((card, index) => (
+          {props.item.cards.map((card, index) => {
+            return (
             <Card card={card} index={index} key={card.id} />
-          ))}
+          )})}
           {provided.placeholder}
         </div>
       )}
