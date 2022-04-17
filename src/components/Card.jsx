@@ -19,15 +19,25 @@ const CardContent = styled.div`
   cursor: grab;
   margin:5px;
 `
+function getStyle(style, snapshot) {
+  if (!snapshot.isDropAnimating) {
+    return style;
+  }
+  return {
+    ...style,
+    transitionDuration: `0.001s`,
+  };
+}
 
 export function Card(props) {
   return (
     <Draggable draggableId={props.card.id} index={props.index}>
-      {provided => (
+      {(provided, snapshot) => (
         <CardContent
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
+          style={getStyle(provided.draggableProps.style, snapshot)}
         >
           {props.card.lettre}
         </CardContent>

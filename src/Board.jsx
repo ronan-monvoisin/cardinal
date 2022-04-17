@@ -20,7 +20,7 @@ const reorder = (list, startIndex, endIndex) => {
 /**
  * Moves an item from one list to another list.
  */
-const move = (state, result) => {
+const moveList = (state, result) => {
   const stateClone = { ...state };
   const [removed] = stateClone[result.source.droppableId].cards.splice(result.source.index, 1);
   stateClone[result.destination.droppableId].cards.splice(result.destination.index, 0, removed);
@@ -30,7 +30,6 @@ const move = (state, result) => {
 function Board(props) {
   const [context, setContext] = useContext(Context);
   const [state, setState] = useState(replik.state)
-  
   const [dragging, setDragging] = useState(false);
   function onDragStart(result) {
     document.querySelector('#board').classList.add('dragging')
@@ -43,7 +42,6 @@ function Board(props) {
 
     if (result.source.droppableId === result.destination.droppableId) {
       const newState = { ...state };
-      console.log(result, newState);
       newState[result.destination.droppableId].cards = reorder(
         state[result.destination.droppableId].cards,
         result.source.index,
@@ -52,10 +50,8 @@ function Board(props) {
       setState(newState);
       setDragging(false)
     } else {
-      console.log("result", result);
       let newState = { ...state };
-      newState = move(state, result);
-      console.log(newState);
+      newState = moveList(state, result);
 
       setState(newState);
       setDragging(false)
@@ -90,21 +86,22 @@ function Board(props) {
       }
       const card = document.querySelector(`[data-rbd-draggable-id='${state.draw.cards[0]?.id}']`).getBoundingClientRect()
       
-      const handChild = document.querySelector('#hand:last-child') ? document.querySelector('#hand:last-child') : false;
-      console.log(handChild)
-      const target = (handChild) ? handChild.getBoundingClientRect() : document.querySelector('#hand::after').getBoundingClientRect();
+      const hand = document.querySelector('#hand').getBoundingClientRect()
       
-      console.log(target);
+      console.log(hand);
 
       const points = [];
       // we want to generate 20 points between the start and the end
       // TODO count point from distance
       const numberOfPoints = 20;
+      // if hand empth dont devide card.with by 2
+      const handEmpty = (state.hand.cards.length)?2:1
+      const handEmpty2 = (state.hand.cards.length)?(card.width / 2):0
 
-      for (let i = numberOfPoints; i >= 0; i--) {
+      for (let i = numberOfPoints-1; i >= 0; i--) {
         points.push(Object.assign({},{
-          x: target.x - (target.width / 2) + (card.right - target.left) * i / numberOfPoints,
-          y: target.y + (card.top - target.top) * i / numberOfPoints
+          x: hand.right - card.width / handEmpty + (card.right - hand.right - handEmpty2) * i / numberOfPoints,
+          y: hand.top + 5 + (card.top - hand.top) * i / numberOfPoints
         }));
       }
       console.log(JSON.stringify(points));
@@ -116,12 +113,14 @@ function Board(props) {
         const newPosition = values.shift();
         drag.move(newPosition);
         console.log(newPosition);
-
-        if (values.length) {
-          moveStepByStep(drag, values);
-        } else {
-          drag.drop();
-        }
+        setTimeout(() => {
+          if (values.length) {
+            moveStepByStep(drag, values);
+          } else {
+            drag.drop();
+          }
+          
+        },0)
       });
     }
 

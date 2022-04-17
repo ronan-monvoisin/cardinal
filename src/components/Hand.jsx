@@ -4,6 +4,13 @@ import { Card } from "./Card";
 import { Droppable } from "react-beautiful-dnd";
 
 const StyledHand = styled.div`
+  width:auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  min-width:90px;
+`
+const HandContainer = styled.div`
   position:absolute;
   bottom:30px;
   left:0;
@@ -35,7 +42,7 @@ const CardDraw = styled.div`
 
 export function Hand(props) {
   return (
-    <>
+    <HandContainer>
       <Droppable droppableId={props.item.name} direction="horizontal">
         {provided => (
           <StyledHand id={props.item.name} ref={provided.innerRef} {...provided.droppableProps}>
@@ -47,6 +54,6 @@ export function Hand(props) {
         )}
       </Droppable>
       <CardDraw id="pickcard">Pick</CardDraw>
-    </>
+    </HandContainer>
   )
 }
