@@ -11,7 +11,7 @@ const getListStyle = isDraggingOver => ({
 const StyledDraw = styled.div`
   position:absolute;
   top:30px;
-  right:30px;
+  right:150px;
   display:flex;
 `
 

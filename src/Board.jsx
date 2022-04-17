@@ -21,12 +21,9 @@ const reorder = (list, startIndex, endIndex) => {
  * Moves an item from one list to another list.
  */
 const move = (state, result) => {
-  console.log(state, result);
   const stateClone = { ...state };
   const [removed] = stateClone[result.source.droppableId].cards.splice(result.source.index, 1);
-
   stateClone[result.destination.droppableId].cards.splice(result.destination.index, 0, removed);
-
   return stateClone;
 };
 
@@ -71,26 +68,44 @@ function Board(props) {
     newState.draw.cards = [...replik.draw(1)]
     setState(newState)
   }
-
+  /*function getBoundingClientRectValues(item) {
+    let values = item.getBoundingClientRect()
+    return Object.assign({}, {
+      width: values.width,
+      height: values.height,
+      x: values.x,
+      y: values.y,
+      left: values.left,
+      right: values.right,
+      top: values.top,
+      bottom: values.bottom
+    })
+  }*/
   function useMyCoolSensor(api) {
+    
     const start = useCallback(function start(event) {
       const preDrag = api.tryGetLock(state.draw.cards[0].id);
       if (!preDrag) {
         return;
       }
       const card = document.querySelector(`[data-rbd-draggable-id='${state.draw.cards[0]?.id}']`).getBoundingClientRect()
-      const pick = document.querySelector('#pickcard').getBoundingClientRect()
-      console.log(pick);
+      
+      const handChild = document.querySelector('#hand:last-child') ? document.querySelector('#hand:last-child') : false;
+      console.log(handChild)
+      const target = (handChild) ? handChild.getBoundingClientRect() : document.querySelector('#hand::after').getBoundingClientRect();
+      
+      console.log(target);
 
       const points = [];
       // we want to generate 20 points between the start and the end
+      // TODO count point from distance
       const numberOfPoints = 20;
 
       for (let i = numberOfPoints; i >= 0; i--) {
-        points.push({
-          x: pick.x - (pick.width / 2) + (card.right - pick.left) * i / numberOfPoints,
-          y: pick.y + (card.top - pick.top) * i / numberOfPoints
-        });
+        points.push(Object.assign({},{
+          x: target.x - (target.width / 2) + (card.right - target.left) * i / numberOfPoints,
+          y: target.y + (card.top - target.top) * i / numberOfPoints
+        }));
       }
       console.log(JSON.stringify(points));
       moveStepByStep(preDrag.fluidLift({ x: card.left, y: card.top }), points)
@@ -123,7 +138,6 @@ function Board(props) {
   return (
     <TheBoard id="board" theme={dragging}>
       <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart} sensors={[useMyCoolSensor]}>
-        <button id="testid">Drag</button>
         <Hand item={state.hand} />
         <Deck item={state.deck} />
         <Draw item={state.draw} onClicked={() => (drawCard())} />

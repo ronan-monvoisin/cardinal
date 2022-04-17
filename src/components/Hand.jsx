@@ -11,6 +11,9 @@ const StyledHand = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
+  &:after{
+    content:"";
+  }
 `
 const CardDraw = styled.div`
   width: 90px;
@@ -40,10 +43,10 @@ export function Hand(props) {
               <Card card={card} index={index} key={card.id} />
             ))}
             {provided.placeholder}
-            <CardDraw id="pickcard">Pick</CardDraw>
           </StyledHand>
         )}
       </Droppable>
+      <CardDraw id="pickcard">Pick</CardDraw>
     </>
   )
 }
