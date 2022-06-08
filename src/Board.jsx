@@ -29,13 +29,14 @@ const moveList = (state, result) => {
 
 function Board(props) {
   const [context, setContext] = useContext(Context);
-  const [state, setState] = useState(replik.state)
+  const [state, setState] = useState(replik.startState)
   const [dragging, setDragging] = useState(false);
   function onDragStart(result) {
     document.querySelector('#board').classList.add('dragging')
   }
 
   function onDragEnd(result) {
+    document.querySelector('#board').classList.remove('dragging')
     if (!result.destination) {
       return;
     }
@@ -56,7 +57,6 @@ function Board(props) {
       setState(newState);
       setDragging(false)
     }
-    document.querySelector('#board').classList.remove('dragging')
   }
 
   function drawCard() {
@@ -64,82 +64,99 @@ function Board(props) {
     newState.draw.cards = [...replik.draw(1)]
     setState(newState)
   }
-  /*function getBoundingClientRectValues(item) {
-    let values = item.getBoundingClientRect()
-    return Object.assign({}, {
-      width: values.width,
-      height: values.height,
-      x: values.x,
-      y: values.y,
-      left: values.left,
-      right: values.right,
-      top: values.top,
-      bottom: values.bottom
-    })
-  }*/
+
   function useMyCoolSensor(api) {
-    
-    const start = useCallback(function start(event) {
-      const preDrag = api.tryGetLock(state.draw.cards[0].id);
+
+
+    const moveCard = (draggableId, dest) => {
+      console.log(draggableId, dest)
+      const preDrag = api.tryGetLock(draggableId)
       if (!preDrag) {
+        console.log('fail')
         return;
       }
-      const card = document.querySelector(`[data-rbd-draggable-id='${state.draw.cards[0]?.id}']`).getBoundingClientRect()
-      
-      const hand = document.querySelector('#hand').getBoundingClientRect()
-      
-      console.log(hand);
+      const card = document.querySelector(`[data-rbd-draggable-id='${draggableId}']`).getBoundingClientRect()
+
+      const hand = document.querySelector(dest).getBoundingClientRect()
 
       const points = [];
       // we want to generate 20 points between the start and the end
       // TODO count point from distance
       const numberOfPoints = 20;
       // if hand empth dont devide card.with by 2
-      const handEmpty = (state.hand.cards.length)?2:1
-      const handEmpty2 = (state.hand.cards.length)?(card.width / 2):0
+      const handEmpty = (state.hand.cards.length) ? 2 : 1
+      const handEmpty2 = (state.hand.cards.length) ? (card.width / 2) : 0
 
-      for (let i = numberOfPoints-1; i >= 0; i--) {
-        points.push(Object.assign({},{
-          x: hand.right - card.width / handEmpty + (card.right - hand.right - handEmpty2) * i / numberOfPoints,
-          y: hand.top + 5 + (card.top - hand.top) * i / numberOfPoints
-        }));
+      for (let i = numberOfPoints - 1; i >= 0; i--) {
+        points.push(
+          Object.assign({}, {
+            x: hand.right - card.width / handEmpty + (card.right - hand.right - handEmpty2) * i / numberOfPoints,
+            y: hand.top + 5 + (card.top - hand.top) * i / numberOfPoints
+          })
+        )
       }
-      console.log(JSON.stringify(points));
+
       moveStepByStep(preDrag.fluidLift({ x: card.left, y: card.top }), points)
-    }, []);
+      console.table(points)
+    }
 
     function moveStepByStep(drag, values) {
       requestAnimationFrame(() => {
-        const newPosition = values.shift();
-        drag.move(newPosition);
-        console.log(newPosition);
+        const newPosition = values.shift()
+        drag.move(newPosition)
+        console.log(newPosition)
         setTimeout(() => {
           if (values.length) {
             moveStepByStep(drag, values);
           } else {
             drag.drop();
           }
-          
-        },0)
+        }, 0)
       });
     }
 
     useEffect(() => {
-      document.querySelector('#pickcard').addEventListener('click', start);
-      //document.querySelector('#board').addEventListener('click', test);
+      document.querySelector('#pickcard').addEventListener('click', () => {
+        moveCard(state.draw.cards[0]?.id, '#hand')
+      });
+      /**================START BTN ==================== /
+      let newContext = { ...context }
+      newContext.modal = {
+        visible: true,
+        content: <button id={'start'}>Start</button>
+      }
+      setContext(newContext)*/
 
       return () => {
-        document.querySelector('#pickcard').removeEventListener('click', start);
-        //document.querySelector('#board').removeEventListener('click', test);
+        document.querySelector('#pickcard').removeEventListener('click', moveCard(state.draw.cards[0]?.id, '#hand'));
       };
     }, []);
+
+    function clickedTest() {
+      moveCard(state.deck.cards[0]?.id, '#hand')
+      let newContext = { ...context }
+      newContext.modal = {
+        visible: false,
+        content: ''
+      }
+      setContext(newContext)
+    }
+    
+    useEffect(() => {
+      document.querySelector('#start')?.addEventListener('click', clickedTest);
+      return () => {
+        document.querySelector('#start')?.removeEventListener('click', clickedTest);
+      };
+
+    }, [context]);
+
   }
   return (
     <TheBoard id="board" theme={dragging}>
       <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart} sensors={[useMyCoolSensor]}>
         <Hand item={state.hand} />
         <Deck item={state.deck} />
-        <Draw item={state.draw} onClicked={() => (drawCard())} />
+        <Draw item={state.draw} onClicked={() => (drawCard())} /> 
       </DragDropContext>
     </TheBoard >
   );
@@ -157,25 +174,35 @@ const TheBoard = styled.div`
   position:relative;
 `
 
+const StartButton = styled.button`
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translateX(-50%) translateY(-50%);
+  padding:30px;
+  box-sizing: border-box;
+  cursor:pointer;
+`
 
 
-    // const test = useCallback(function test(event) {
-    //   console.log("card:",state.deck.cards[0].id);
-    //   let testcard = api.tryGetLock(state.deck.cards[0].id);
-    //   console.log("testcard:",testcard);
-    //   let movecard = testcard.fluidLift({ x: 1, y: 1 })
-    //   movecard.move({ x: 800, y: 600 })
-    //   board.classList.add('dragging')
-    //   testid.style.display = "none"
-    //   testid.innerText = "Drop"
-    //   testid.addEventListener('click', () => {
-    //     movecard.drop()
-    //     testid.innerText = "Drag"
-    //     testid.removeEventListener('click', test)
-    //     testid.classList.remove('dragging')
 
-    //   })
-    // })
+// const test = useCallback(function test(event) {
+//   console.log("card:",state.deck.cards[0].id);
+//   let testcard = api.tryGetLock(state.deck.cards[0].id);
+//   console.log("testcard:",testcard);
+//   let movecard = testcard.fluidLift({ x: 1, y: 1 })
+//   movecard.move({ x: 800, y: 600 })
+//   board.classList.add('dragging')
+//   testid.style.display = "none"
+//   testid.innerText = "Drop"
+//   testid.addEventListener('click', () => {
+//     movecard.drop()
+//     testid.innerText = "Drag"
+//     testid.removeEventListener('click', test)
+//     testid.classList.remove('dragging')
+
+//   })
+// })
 function pickCard() {
   if (!state.draw.cards.length) return
   const newState = { ...state };

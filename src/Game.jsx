@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Context } from "./Context";
 import Board from "./Board"
 import Interface from "./Interface"
+import replik from "./games/replik/replik";
 
 export default function Game() {
-  const [context, setContext] = useState(createContext());
+  const [context, setContext] = useState(replik.context)
 
   return (
     <Context.Provider value={[context, setContext]}>
@@ -12,8 +13,4 @@ export default function Game() {
       <Board />
     </Context.Provider>
   )
-}
-function createContext() {
-  let context = { title: "Replik", round: 0, token: "" }
-  return context
 }

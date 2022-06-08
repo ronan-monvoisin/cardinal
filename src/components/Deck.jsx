@@ -6,7 +6,7 @@ import { Droppable } from "react-beautiful-dnd";
 const StyledDeck = styled.div`
   position:absolute;
   display:flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   top:0;
   right:0;
   `
@@ -16,7 +16,7 @@ export function Deck(props) {
     <Droppable droppableId={props.item.name}>
       {provided => (
         <StyledDeck id={props.item.name} ref={provided.innerRef} {...provided.droppableProps}>
-          {props.item.cards.slice(0).reverse().map((card, index) => {
+          {props.item.cards.map((card, index) => {
             return (
             <Card card={card} index={index} key={card.id} />
           )})}
