@@ -117,6 +117,7 @@ function Board(props) {
 
     useEffect(() => {
       document.querySelector('#pickcard').addEventListener('click', () => {
+        if(!state.draw.cards.length)drawCard()
         moveCard(state.draw.cards[0]?.id, '#hand')
       });
       /**================START BTN ==================== /
@@ -132,6 +133,7 @@ function Board(props) {
       };
     }, []);
 
+    /*
     function clickedTest() {
       moveCard(state.deck.cards[0]?.id, '#hand')
       let newContext = { ...context }
@@ -141,21 +143,20 @@ function Board(props) {
       }
       setContext(newContext)
     }
-    
     useEffect(() => {
       document.querySelector('#start')?.addEventListener('click', clickedTest);
       return () => {
         document.querySelector('#start')?.removeEventListener('click', clickedTest);
       };
 
-    }, [context]);
+    }, [context]);*/
 
   }
   return (
     <TheBoard id="board" theme={dragging}>
       <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart} sensors={[useMyCoolSensor]}>
         <Hand item={state.hand} />
-        <Deck item={state.deck} />
+        <Deck item={state.deck} styled={{PointerEvent:'none'}} />
         <Draw item={state.draw} onClicked={() => (drawCard())} /> 
       </DragDropContext>
     </TheBoard >
