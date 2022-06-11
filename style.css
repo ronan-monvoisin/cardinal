@@ -1,0 +1,6 @@
+.dragging #deck,
+.dragging #hand,
+.dragging #draw {
+    outline: #2196f3 dashed 5px;
+    outline-offset: 2.5px;
+}
